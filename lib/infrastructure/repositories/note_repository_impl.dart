@@ -1,4 +1,3 @@
-import 'package:isar/isar.dart';
 import 'package:isar_example/domain/datasources/notes_datasource.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/domain/repositories/notes_repository.dart';
@@ -23,7 +22,7 @@ class NoteRepositoryImpl extends NotesRepository {
   }
 
   @override
-  Future<Note?> getById(Id id) async {
+  Future<Note?> getById(int id) async {
     return await datasource.getById(id);
   }
 

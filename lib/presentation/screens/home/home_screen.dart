@@ -14,16 +14,16 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Isar example')),
+      appBar: AppBar(title: const Text('Todo example')),
       body: const HomeView(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // final note = Note(title: 'Hola mundo');
           // ref.read(asyncNotesProvider.notifier).add(note);
           context.push<Note>(
-          EditScreen.path,
-          extra: Note(),
-        );
+            EditScreen.path,
+            extra: Note(),
+          );
         },
         child: const Icon(Icons.add),
       ),
@@ -76,7 +76,6 @@ class NoteView extends ConsumerWidget {
           EditScreen.path,
           extra: note,
         );
-        
       },
       // trailing
       trailing: IconButton(

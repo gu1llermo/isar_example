@@ -12,8 +12,9 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   late NoteRepositoryImpl _notesRepository;
 
   Future<List<Note>> _fetchNotes() async {
-    final listNotes = await _notesRepository.getAllNotes();
-    return listNotes;
+    return await getAllNotes();
+    // final listNotes = await _notesRepository.getAllNotes();
+    // return listNotes;
   }
 
   @override
@@ -52,7 +53,9 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
 
   FutureOr<List<Note>> getAllNotes() async {
     // esto no debe actualizar ningún cambio de estado ojo
-    return await _fetchNotes();
+    final listNotes = await _notesRepository.getAllNotes();
+    return listNotes;
+    // return await _fetchNotes();
   }
 
   FutureOr<Note?> getNoteById(int id) async {

@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_example/domain/datasources/notes_datasource.dart';
-import 'package:isar_example/infrastructure/datasources/note_isar_datasource.dart';
+// import 'package:isar_example/infrastructure/datasources/note_isar_datasource.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
+
+import '../../../infrastructure/datasources/note_sembast_datasource.dart';
 
 final notesRepositoryProvider = Provider(
   (ref) {
@@ -26,12 +28,13 @@ final datasourceProvider =
 class DatasourceNotifier extends Notifier<NotesDatasource> {
   @override
   NotesDatasource build() {
-    return NoteIsarDatasource();
+    return NoteSembastDatasource();
+    // return NoteIsarDatasource();
   }
 
   void onlineMode() {}
   void offLineMode() {
     // pero antes de seleciconar creo que debería hacer sincronización ó algo así
-    state = NoteIsarDatasource();
+    // state = NoteIsarDatasource();
   }
 }
