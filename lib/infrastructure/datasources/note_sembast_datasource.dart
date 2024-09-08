@@ -43,11 +43,8 @@ class NoteSembastDatasource extends NotesDatasource {
   @override
   Future<void> add(Note note) async {
     final db = await database;
-
     final key = await store.add(db, NoteMapper.entityToJson(note));
-
     final noteCopy = note.copyWith(id: key);
-
     await update(noteCopy);
     // tengo que hacer así para que la nota contenga el id respectivo
   }
