@@ -59,7 +59,7 @@ class NoteIsarDatasource extends NotesDatasource {
   }
 
   @override
-  Future<Note?> getById(Id id) async {
+  Future<Note?> getById(int id) async {
     final isar = await isarDb;
     final noteIsar = await isar.noteIsars.get(id); // get
     if (noteIsar == null) return null;
