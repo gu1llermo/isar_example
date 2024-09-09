@@ -37,13 +37,16 @@ class HomeView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final asyncNotes = ref.watch(asyncNotesProvider);
-    // debugPrint('Hola');
+    final scrollNotesController = ref.watch(scrollNotesProvider);
 
     return asyncNotes.when(
       data: (notes) => ListView.builder(
+        padding: const EdgeInsets.only(bottom: 80),
         itemCount: notes.length,
+        controller: scrollNotesController,
         itemBuilder: (context, index) {
-          final note = notes[index];
+          final indice = (notes.length) - index - 1;
+          final note = notes[indice];
           return NoteView(note: note);
         },
       ),

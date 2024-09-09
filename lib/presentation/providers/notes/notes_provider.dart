@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
 import 'package:isar_example/presentation/providers/notes/notes_repository_provider.dart';
+
+final scrollNotesProvider = Provider((ref) => ScrollController());
 
 final asyncNotesProvider =
     AsyncNotifierProvider<NotesNotifier, List<Note>>(() => NotesNotifier());
