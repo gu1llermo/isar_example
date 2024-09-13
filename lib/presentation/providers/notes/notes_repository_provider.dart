@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_example/domain/datasources/notes_datasource.dart';
+import 'package:isar_example/infrastructure/datasources/note_google_sheets_datasource.dart';
 // import 'package:isar_example/infrastructure/datasources/note_isar_datasource.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
 
@@ -28,7 +29,8 @@ final datasourceProvider =
 class DatasourceNotifier extends Notifier<NotesDatasource> {
   @override
   NotesDatasource build() {
-    return NoteSembastDatasource();
+    return NoteGoogleSheetsDatasource();
+    // return NoteSembastDatasource();
     // return NoteIsarDatasource();
   }
 

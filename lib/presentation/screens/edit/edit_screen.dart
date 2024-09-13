@@ -30,18 +30,22 @@ class EditView extends ConsumerStatefulWidget {
 class _EditViewState extends ConsumerState<EditView> {
   late TextEditingController _titleController;
   late TextEditingController _contentController;
+  // late FocusNode _titleFocusNode;
 
   @override
   void initState() {
     super.initState();
     _titleController = TextEditingController(text: widget.note.title);
     _contentController = TextEditingController(text: widget.note.content);
+    // _titleFocusNode =
+    //     FocusNode(canRequestFocus: false, descendantsAreFocusable: true);
   }
 
   @override
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
+    // _titleFocusNode.dispose();
     super.dispose();
   }
 
@@ -90,8 +94,6 @@ class _EditViewState extends ConsumerState<EditView> {
       content = _contentController.text;
     }
     if (isNewNote(note)) {
-      final scrollNotesController = ref.watch(scrollNotesProvider);
-      moveScrollNotes(scrollNotesController);
       ref
           .read(asyncNotesProvider.notifier)
           .add(note.copyWith(title: title, content: content));
@@ -100,14 +102,6 @@ class _EditViewState extends ConsumerState<EditView> {
           .read(asyncNotesProvider.notifier)
           .updateNote(note.copyWith(title: title, content: content));
     }
-  }
-
-  void moveScrollNotes(ScrollController controller) async {
-    if (!controller.hasClients) return;
-    await Future.delayed(const Duration(milliseconds: 400));
-    // final maxScrollExtent = controller.position.maxScrollExtent;
-    controller.animateTo(0,
-        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
   }
 
   @override

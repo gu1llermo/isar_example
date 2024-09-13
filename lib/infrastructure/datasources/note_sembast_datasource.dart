@@ -41,20 +41,25 @@ class NoteSembastDatasource extends NotesDatasource {
   }
 
   @override
-  Future<void> add(Note note) async {
+  Future<bool> add(Note note) async {
+    // yo necesito que me notifiques sí pudistes hacer tú función
+    // porque sino lo pudistes hacer deberían planificar hacerlo en otro momento.
+
     final db = await database;
-    final key = await store.add(db, NoteMapper.entityToJson(note));
+    final key = await store.add(db, NoteMapper.entityToMap(note));
     final noteCopy = note.copyWith(id: key);
-    await update(noteCopy);
+    update(noteCopy);
     // tengo que hacer así para que la nota contenga el id respectivo
+    return true;
   }
 
   @override
-  Future<void> delete(Note note) async {
-    if (note.id == null) return;
+  Future<bool> delete(Note note) async {
+    if (note.id == null) return true;
     final db = await database;
     final key = note.id!;
     await store.delete(db, finder: Finder(filter: Filter.byKey(key)));
+    return true;
   }
 
   @override
@@ -62,7 +67,7 @@ class NoteSembastDatasource extends NotesDatasource {
     final db = await database;
     final snapshot = await store.query().getSnapshots(db);
     final listNotes =
-        snapshot.map((e) => NoteMapper.jsonToEntity(e.value)).toList();
+        snapshot.map((e) => NoteMapper.mapToEntity(e.value)).toList();
     return listNotes;
   }
 
@@ -72,16 +77,17 @@ class NoteSembastDatasource extends NotesDatasource {
     var noteRecord = await (store.record(id).getSnapshot(db)
         as FutureOr<RecordSnapshot<int, Map<String, Object>>?>);
     if (noteRecord?.value == null) return null;
-    return NoteMapper.jsonToEntity(noteRecord!.value);
+    return NoteMapper.mapToEntity(noteRecord!.value);
   }
 
   @override
-  Future<void> update(Note note) async {
-    if (note.id == null) return;
+  Future<bool> update(Note note) async {
+    if (note.id == null) return true;
     final db = await database;
     final key = note.id!;
 
-    await store.update(db, NoteMapper.entityToJson(note),
+    await store.update(db, NoteMapper.entityToMap(note),
         finder: Finder(filter: Filter.byKey(key)));
+    return true;
   }
 }
