@@ -1,9 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:animate_do/animate_do.dart';
 import '/presentation/screens/screens.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/presentation/providers/notes/notes_provider.dart';
+
+void showCustomSnackbar(BuildContext context,
+    {required Widget content, Duration duration = const Duration(seconds: 3)}) {
+  ScaffoldMessenger.of(context).clearSnackBars();
+  final snackbar = SnackBar(
+    duration: duration,
+    content: content,
+    action: SnackBarAction(
+      label: 'ok',
+      onPressed: () {},
+    ),
+  );
+  ScaffoldMessenger.of(context).showSnackBar(snackbar);
+}
+
+bool isLoading = true;
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -18,9 +35,12 @@ class HomeScreen extends ConsumerWidget {
       body: const HomeView(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // final note = Note(title: 'Hola mundo');
-          // ref.read(asyncNotesProvider.notifier).add(note);
-          context.push<Note>(
+          if (isLoading) {
+            showCustomSnackbar(context,
+                content: const Text('Sincronizando, espere un momento...'));
+            return;
+          }
+          context.push(
             EditScreen.path,
             extra: Note(),
           );
@@ -31,28 +51,114 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
-class HomeView extends ConsumerWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncNotes = ref.watch(asyncNotesProvider);
-    // final scrollNotesController = ref.watch(scrollNotesProvider);
-    final scrollNotesController = ScrollController();
+  ConsumerState<ConsumerStatefulWidget> createState() => _HomeViewState();
+}
 
+class _HomeViewState extends ConsumerState<HomeView> {
+  List<Note>? _notesBackup;
+  // bool _isLoading = true;
+
+// @override
+//   void initState() {
+
+//     super.initState();
+//   WidgetsBinding.instance
+//         .addPostFrameCallback((_) => showSnackBar(context));
+//   }
+
+  // void showSnackBar(BuildContext context) {
+
+  //   if (_isLoading) {
+  //     const content = Row(
+  //       children: [
+  //         Text('Sincronizando...'),
+  //         CircularProgressIndicator(),
+  //       ],
+  //     );
+  //     showCustomSnackbar(context, content);
+  //   } else {
+  //     const content = Text('Sincronizado exitosamente! ;)');
+  //     if (_notesBackup != null) {
+  //       showCustomSnackbar(context, content,
+  //           duration: const Duration(seconds: 3));
+  //     }
+  //   }
+  // }
+
+  @override
+  Widget build(BuildContext context) {
+    final asyncNotes = ref.watch(asyncNotesProvider);
+    final scrollNotesController = ScrollController();
+    // ref.read(isLoadingProvider.notifier).state = true;
     return asyncNotes.when(
-      data: (notes) => ListView.builder(
-        padding: const EdgeInsets.only(bottom: 80),
-        itemCount: notes.length,
-        controller: scrollNotesController,
-        itemBuilder: (context, index) {
-          final indice = (notes.length) - index - 1;
-          final note = notes[indice];
-          return NoteView(note: note, scrollController: scrollNotesController);
-        },
-      ),
-      error: (error, stackTrace) => Center(child: Text('Error: $error')),
-      loading: () => const Center(child: CircularProgressIndicator()),
+      data: (notes) {
+        isLoading = false;
+        _notesBackup = notes;
+
+        return FadeInUp(
+          duration: const Duration(milliseconds: 400),
+          from: 50,
+          child: ListView.builder(
+            padding: const EdgeInsets.only(bottom: 80),
+            itemCount: notes.length,
+            controller: scrollNotesController,
+            itemBuilder: (context, index) {
+              final indice = (notes.length) - index - 1;
+              final note = notes[indice];
+              return NoteView(
+                  note: note, scrollController: scrollNotesController);
+            },
+          ),
+        );
+      },
+      error: (error, stackTrace) {
+        isLoading = false;
+        return Center(child: Text('Error: $error'));
+      },
+      loading: () {
+        isLoading = true;
+        if (_notesBackup == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        return FadeInDown(
+          duration: const Duration(milliseconds: 400),
+          from: 50,
+          child: Column(
+            children: [
+              const SizedBox(height: 2),
+              const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Sincronizando... '),
+                  CircularProgressIndicator(),
+                ],
+              ),
+              const SizedBox(height: 2),
+              Expanded(
+                child: ListView.builder(
+                  padding: const EdgeInsets.only(bottom: 80),
+                  itemCount: _notesBackup!.length,
+                  controller: scrollNotesController,
+                  itemBuilder: (context, index) {
+                    final indice = (_notesBackup!.length) - index - 1;
+                    final note = _notesBackup![indice];
+                    return NoteView(
+                      note: note,
+                      scrollController: scrollNotesController,
+                      isActive: false,
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      // loading: () => const Center(child: CircularProgressIndicator()),
     );
   }
 }
@@ -66,10 +172,15 @@ void moveScrollNotes(ScrollController scrollNotesController) async {
 }
 
 class NoteView extends ConsumerWidget {
-  const NoteView(
-      {super.key, required this.note, required this.scrollController});
+  const NoteView({
+    super.key,
+    required this.note,
+    required this.scrollController,
+    this.isActive = true,
+  });
   final Note note;
   final ScrollController scrollController;
+  final bool? isActive;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -82,6 +193,7 @@ class NoteView extends ConsumerWidget {
       child: Card(
         elevation: 3,
         child: ListTile(
+          enabled: isActive!,
           title: Text(
             note.title,
             maxLines: 1,
@@ -94,12 +206,12 @@ class NoteView extends ConsumerWidget {
           ),
 
           onTap: () {
-            context.push<Note>(
+            context.push(
               EditScreen.path,
               extra: note,
             );
           },
-          onLongPress: () {},
+
           // trailing
           // trailing: IconButton(
           //     onPressed: () {
@@ -108,9 +220,11 @@ class NoteView extends ConsumerWidget {
           //     icon: const Icon(Icons.delete_forever)),
           leading: Checkbox(
             value: note.isCompleted,
-            onChanged: (value) {
-              ref.read(asyncNotesProvider.notifier).toggle(note);
-            },
+            onChanged: isActive!
+                ? (value) {
+                    ref.read(asyncNotesProvider.notifier).toggle(note);
+                  }
+                : null,
           ),
         ),
       ),

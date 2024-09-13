@@ -17,16 +17,19 @@ class NoteMapper {
     ..title = note.title;
 
   static Note mapToEntity(Map<String, dynamic>? json) => Note(
-      id: json?['id'],
-      content: json?['content'] ?? '',
-      isCompleted: json?['isCompleted'] ?? false,
-      title: json?['title'] ?? '');
+        id: json?['id'],
+        content: json?['content'] ?? '',
+        isCompleted: json?['isCompleted'] ?? false,
+        title: json?['title'] ?? '',
+        timeStamp: json?['timeStamp'] ?? getTimeStamp(),
+      );
 
   static Map<String, dynamic> entityToMap(Note note) => {
         'id': note.id,
         'content': note.content,
         'isCompleted': note.isCompleted,
         'title': note.title,
+        'timeStamp': note.timeStamp
       };
 
   static Note noteGoogleSheetsToEntity(NoteGoogleSheets noteGoogleSheet) =>
@@ -34,7 +37,8 @@ class NoteMapper {
           id: noteGoogleSheet.id,
           content: noteGoogleSheet.content,
           isCompleted: noteGoogleSheet.isCompleted,
-          title: noteGoogleSheet.title);
+          title: noteGoogleSheet.title,
+          timeStamp: noteGoogleSheet.timeStamp);
 
   static NoteGoogleSheets entityToNoteGoogleSheets(Note note) =>
       NoteGoogleSheets(
@@ -42,6 +46,6 @@ class NoteMapper {
         content: note.content,
         isCompleted: note.isCompleted,
         title: note.title,
-        timeStamp: getTimeStamp(),
+        timeStamp: note.timeStamp ?? getTimeStamp(),
       );
 }

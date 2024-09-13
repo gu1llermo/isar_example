@@ -7,11 +7,13 @@ import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/mappers/note_mapper.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/add_note_response.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/get_all_notes_response.dart';
+import 'package:isar_example/infrastructure/models/google_sheets/get_note_response.dart';
+import 'package:isar_example/infrastructure/models/google_sheets/google_sheets_exception.dart';
 
 class NoteGoogleSheetsDatasource extends NotesDatasource {
   final dio = Dio();
   final baseUrl =
-      'https://script.google.com/macros/s/AKfycbzSHxr7oW8uUB2SStxdCNSQ7dssg2zzaOWNaJ1sJSL4qPkeW4G9zWJZpuAnZgT9wozC/exec';
+      'https://script.google.com/macros/s/AKfycbw_2zzgn0t0xEV7sgoeSYGrU09kRaMW8SJI5OC76Y4GItuDXzD-I9TntCT_RdVLGgiA/exec';
 
   @override
   Future<bool> add(Note note) async {
@@ -99,7 +101,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     final response = await doPost({"comando": "getAllNotes"});
 
     if (response == null) {
-      return [];
+      throw 'No hay conexión a internet';
     }
 
     final notesResponse = GetAllNotesResponse.fromJson(response.data);
@@ -143,9 +145,28 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   // }
 
   @override
-  Future<Note?> getById(int id) {
-    // TODO: implement getById
-    throw UnimplementedError();
+  Future<Note?> getById(int id) async {
+    final response = await doPost({
+      "comando": "getNoteById",
+      "parametros": {
+        "id": id,
+      }
+    });
+
+    if (response == null) {
+      throw 'No hay conexión a internet';
+    }
+
+    final noteResponse = GetNoteResponse.fromJson(response.data);
+
+    final noteGoogleSheet = noteResponse.data.note;
+    if (noteGoogleSheet == null) {
+      return null;
+    }
+
+    final note = NoteMapper.noteGoogleSheetsToEntity(noteGoogleSheet);
+
+    return note;
   }
 
   @override

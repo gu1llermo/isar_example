@@ -78,8 +78,11 @@ class _EditViewState extends ConsumerState<EditView> {
   void procesaBack(Note note) {
     if (isEmptyBothFields() && hasChanged()) {
       // quiere decir que eliminaron el contenido de la nota
-      ref.read(asyncNotesProvider.notifier).delete(note);
-      return;
+      ref
+          .read(asyncNotesProvider.notifier)
+          .delete(note); // antes de irme hago esto ;)
+      return; // no hace falta el pop, porque para salir de aquí
+      // el usuario ya presionó la tecla deshacer y eso es el pop
     }
     if (!hasChanged()) {
       return;

@@ -1,24 +1,24 @@
 // To parse this JSON data, do
 //
-//     final googleSheetsResponse = googleSheetsResponseFromJson(jsonString);
+//     final getNoteResponse = getNoteResponseFromJson(jsonString);
 
 import 'package:isar_example/infrastructure/models/google_sheets/note_google_sheets.dart';
 
-class GetAllNotesResponse {
+class GetNoteResponse {
   final bool hasError;
   final Data data;
   final int code;
   final String msg;
 
-  GetAllNotesResponse({
+  GetNoteResponse({
     required this.hasError,
     required this.data,
     required this.code,
     required this.msg,
   });
 
-  factory GetAllNotesResponse.fromJson(Map<String, dynamic> json) =>
-      GetAllNotesResponse(
+  factory GetNoteResponse.fromJson(Map<String, dynamic> json) =>
+      GetNoteResponse(
         hasError: json["hasError"],
         data: Data.fromJson(json["data"]),
         code: json["code"],
@@ -34,18 +34,17 @@ class GetAllNotesResponse {
 }
 
 class Data {
-  final List<NoteGoogleSheets> notes;
+  final NoteGoogleSheets? note;
 
   Data({
-    required this.notes,
+    required this.note,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        notes: List<NoteGoogleSheets>.from(
-            json["notes"].map((x) => NoteGoogleSheets.fromMap(x))),
+        note: NoteGoogleSheets.fromMap(json["note"]),
       );
 
   Map<String, dynamic> toJson() => {
-        "notes": List<dynamic>.from(notes.map((x) => x.toMap())),
+        "note": note?.toMap(),
       };
 }

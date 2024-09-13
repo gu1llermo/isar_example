@@ -13,10 +13,10 @@ class NoteGoogleSheets {
     required this.timeStamp,
   });
 
-  factory NoteGoogleSheets.fromJson(Map<String, dynamic> json) {
+  factory NoteGoogleSheets.fromMap(Map<String, dynamic> json) {
     final id = json["id"];
-    final title = json["title"];
-    final content = json["content"];
+    final title = '${json["title"]}';
+    final content = '${json["content"]}';
     final isCompleted = json["isCompleted"];
     final timeStamp = json["timeStamp"];
     return NoteGoogleSheets(
@@ -27,7 +27,7 @@ class NoteGoogleSheets {
         timeStamp: timeStamp);
   }
 
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toMap() => {
         "id": id,
         "title": title,
         "content": content,
