@@ -1,28 +1,24 @@
 import 'dart:async';
-
-import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
 import 'package:isar_example/presentation/providers/notes/notes_repository_provider.dart';
 
-// final scrollNotesProvider = Provider((ref) => ScrollController());
-
 final asyncNotesProvider =
     AsyncNotifierProvider<NotesNotifier, List<Note>>(() => NotesNotifier());
 
 class NotesNotifier extends AsyncNotifier<List<Note>> {
-  late NoteRepositoryImpl _notesRepository;
+  late NoteRepositoryImpl _localNotesRepository;
+  // late NoteRepositoryImpl _remoteNotesRepository;
 
   Future<List<Note>> _fetchNotes() async {
     return await getAllNotes();
-    // final listNotes = await _notesRepository.getAllNotes();
-    // return listNotes;
   }
 
   @override
   FutureOr<List<Note>> build() async {
-    _notesRepository = ref.watch(notesRepositoryProvider);
+    _localNotesRepository = ref.watch(localNotesRepositoryProvider);
+    // _remoteNotesRepository = ref.watch(remoteNotesRepositoryProvider);
     // print('Aquí');
     return await _fetchNotes();
   }
@@ -31,7 +27,7 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     // Set the state to loading
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _notesRepository.add(note);
+      await _localNotesRepository.add(note);
       return await _fetchNotes();
     });
   }
@@ -40,37 +36,37 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     // Set the state to loading
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _notesRepository.update(note);
+      await _localNotesRepository.update(note);
       return await _fetchNotes();
     });
   }
 
   Future<void> toggle(Note note) async {
-    state = const AsyncValue.loading();
+    // state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final noteToggled = note.copyWith(isCompleted: !note.isCompleted);
-      await _notesRepository.update(noteToggled);
+      await _localNotesRepository.update(noteToggled);
       return await _fetchNotes();
     });
   }
 
   FutureOr<List<Note>> getAllNotes() async {
     // esto no debe actualizar ningún cambio de estado ojo
-    final listNotes = await _notesRepository.getAllNotes();
+    final listNotes = await _localNotesRepository.getAllNotes();
     return listNotes;
     // return await _fetchNotes();
   }
 
   FutureOr<Note?> getNoteById(int id) async {
     // esto no debe actualizar ningún cambio de estado ojo
-    return await _notesRepository.getById(id);
+    return await _localNotesRepository.getById(id);
   }
 
   Future<void> delete(Note note) async {
     // Set the state to loading
-    state = const AsyncValue.loading();
+    // state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
-      await _notesRepository.delete(note);
+      await _localNotesRepository.delete(note);
       return await _fetchNotes();
     });
   }

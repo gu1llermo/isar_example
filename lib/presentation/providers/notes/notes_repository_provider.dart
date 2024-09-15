@@ -1,20 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:isar_example/domain/datasources/notes_datasource.dart';
 import 'package:isar_example/infrastructure/datasources/note_google_sheets_datasource.dart';
-// import 'package:isar_example/infrastructure/datasources/note_isar_datasource.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
 
 import '../../../infrastructure/datasources/note_sembast_datasource.dart';
 
-final notesRepositoryProvider = Provider(
-  (ref) {
-    final datasource = ref.watch(datasourceProvider);
+final localNotesRepositoryProvider =
+    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource()));
 
-    final notesRepository = NoteRepositoryImpl(datasource);
-
-    return notesRepository;
-  },
-);
+final remoteNotesRepositoryProvider =
+    Provider((ref) => NoteRepositoryImpl(NoteGoogleSheetsDatasource()));
 
 // me parece que cuando cambia de datasource debería hacer otras cosas más
 
@@ -22,21 +16,16 @@ final notesRepositoryProvider = Provider(
 //   return NoteIsarDatasource(); // es el valor de su estado inicial
 // });
 
-final datasourceProvider =
-    NotifierProvider<DatasourceNotifier, NotesDatasource>(
-        () => DatasourceNotifier());
+// final datasourceProvider =
+//     NotifierProvider<DatasourceNotifier, NotesDatasource>(
+//         () => DatasourceNotifier());
 
-class DatasourceNotifier extends Notifier<NotesDatasource> {
-  @override
-  NotesDatasource build() {
-    return NoteGoogleSheetsDatasource();
-    // return NoteSembastDatasource();
-    // return NoteIsarDatasource();
-  }
+// class DatasourceNotifier extends Notifier<NotesDatasource> {
+//   @override
+//   NotesDatasource build() {
+//     return NoteGoogleSheetsDatasource();
+//     // return NoteSembastDatasource();
+//     // return NoteIsarDatasource();
+//   }
 
-  void onlineMode() {}
-  void offLineMode() {
-    // pero antes de seleciconar creo que debería hacer sincronización ó algo así
-    // state = NoteIsarDatasource();
-  }
-}
+// }

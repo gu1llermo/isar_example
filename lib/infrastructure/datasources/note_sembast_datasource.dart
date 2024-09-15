@@ -41,53 +41,64 @@ class NoteSembastDatasource extends NotesDatasource {
   }
 
   @override
-  Future<bool> add(Note note) async {
-    // yo necesito que me notifiques sí pudistes hacer tú función
-    // porque sino lo pudistes hacer deberían planificar hacerlo en otro momento.
-
+  Future<int> add(Note note) async {
     final db = await database;
-    final key = await store.add(db, NoteMapper.entityToMap(note));
-    final noteCopy = note.copyWith(id: key);
-    update(noteCopy);
-    // tengo que hacer así para que la nota contenga el id respectivo
-    return true;
+
+    late int key;
+    await db.transaction((txn) async {
+      key = await store.add(txn, NoteMapper.entityToMap(note));
+
+      // tengo que hacer así para que la nota contenga el id respectivo
+      final noteCopy = note.copyWith(id: key);
+      await store.record(key).update(txn, NoteMapper.entityToMap(noteCopy));
+    });
+
+    return key;
   }
 
   @override
-  Future<bool> delete(Note note) async {
-    if (note.id == null) return true;
+  Future<int> delete(Note note) async {
+    if (note.id == null) return -1;
     final db = await database;
     final key = note.id!;
-    await store.delete(db, finder: Finder(filter: Filter.byKey(key)));
-    return true;
+
+    await store.record(key).delete(db);
+
+    // await store.delete(db, finder: Finder(filter: Filter.byKey(key)));
+
+    return key;
   }
 
   @override
   Future<List<Note>> getAllNotes() async {
     final db = await database;
-    final snapshot = await store.query().getSnapshots(db);
-    final listNotes =
-        snapshot.map((e) => NoteMapper.mapToEntity(e.value)).toList();
+    final snapshots = await store.query().getSnapshots(db);
+    final listNotes = snapshots
+        .map((snapshot) => NoteMapper.mapToEntity(snapshot.value))
+        .toList();
     return listNotes;
   }
 
   @override
   Future<Note?> getById(int id) async {
     final db = await database;
-    var noteRecord = await (store.record(id).getSnapshot(db)
-        as FutureOr<RecordSnapshot<int, Map<String, Object>>?>);
-    if (noteRecord?.value == null) return null;
-    return NoteMapper.mapToEntity(noteRecord!.value);
+    final mapRecord = await store.record(id).get(db);
+    // supongo que si no lo consigue regresa null
+    if (mapRecord == null) return null;
+    return NoteMapper.mapToEntity(mapRecord);
   }
 
   @override
-  Future<bool> update(Note note) async {
-    if (note.id == null) return true;
+  Future<int> update(Note note) async {
+    if (note.id == null) return -1;
     final db = await database;
     final key = note.id!;
 
-    await store.update(db, NoteMapper.entityToMap(note),
-        finder: Finder(filter: Filter.byKey(key)));
-    return true;
+    // el key tiene que existir para que se actualice
+    await store.record(key).update(db, NoteMapper.entityToMap(note));
+
+    // await store.update(db, NoteMapper.entityToMap(note),
+    //     finder: Finder(filter: Filter.byKey(key)));
+    return key;
   }
 }

@@ -100,7 +100,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         _notesBackup = notes;
 
         return FadeInUp(
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 600),
           from: 50,
           child: ListView.builder(
             padding: const EdgeInsets.only(bottom: 80),
@@ -125,7 +125,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
           return const Center(child: CircularProgressIndicator());
         }
         return FadeInDown(
-          duration: const Duration(milliseconds: 400),
+          duration: const Duration(milliseconds: 600),
           from: 50,
           child: Column(
             children: [
@@ -188,7 +188,7 @@ class NoteView extends ConsumerWidget {
       key: ValueKey(note.id.toString()),
       onDismissed: (direction) async {
         await ref.read(asyncNotesProvider.notifier).delete(note);
-        moveScrollNotes(scrollController);
+        //moveScrollNotes(scrollController);
       },
       child: Card(
         elevation: 3,

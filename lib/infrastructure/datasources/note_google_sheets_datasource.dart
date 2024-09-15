@@ -16,7 +16,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       'https://script.google.com/macros/s/AKfycbw_2zzgn0t0xEV7sgoeSYGrU09kRaMW8SJI5OC76Y4GItuDXzD-I9TntCT_RdVLGgiA/exec';
 
   @override
-  Future<bool> add(Note note) async {
+  Future<int> add(Note note) async {
     final response = await doPost({
       "comando": "addNote",
       "parametros": {
@@ -24,18 +24,18 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       }
     });
     if (response == null) {
-      return false; // significa que no se guardó
+      return -1; // significa que no se guardó
     }
 
-    //final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response.data);
 
-    //final id = addResponse.data.id;
+    final id = addResponse.data.id;
 
-    return true;
+    return id;
   }
 
   @override
-  Future<bool> delete(Note note) async {
+  Future<int> delete(Note note) async {
     final response = await doPost({
       "comando": "deleteNote",
       "parametros": {
@@ -43,14 +43,14 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       }
     });
     if (response == null) {
-      return false; // significa que no se guardó
+      return -1; // significa que no se guardó
     }
 
-    //final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response.data);
 
-    //final id = addResponse.data.id;
+    final id = addResponse.data.id;
 
-    return true;
+    return id;
   }
 
   // @override
@@ -170,7 +170,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   }
 
   @override
-  Future<bool> update(Note note) async {
+  Future<int> update(Note note) async {
     final response = await doPost({
       "comando": "updateNote",
       "parametros": {
@@ -178,13 +178,13 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       }
     });
     if (response == null) {
-      return false; // significa que no se guardó
+      return -1; // significa que no se guardó
     }
 
-    //final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response.data);
 
-    //final id = addResponse.data.id;
+    final id = addResponse.data.id;
 
-    return true;
+    return id;
   }
 }

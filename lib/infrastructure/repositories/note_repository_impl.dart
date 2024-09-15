@@ -7,12 +7,12 @@ class NoteRepositoryImpl extends NotesRepository {
   NoteRepositoryImpl(this.datasource);
 
   @override
-  Future<bool> add(Note note) async {
+  Future<int> add(Note note) async {
     return await datasource.add(note);
   }
 
   @override
-  Future<bool> delete(Note note) async {
+  Future<int> delete(Note note) async {
     return await datasource.delete(note);
   }
 
@@ -27,7 +27,7 @@ class NoteRepositoryImpl extends NotesRepository {
   }
 
   @override
-  Future<bool> update(Note note) async {
+  Future<int> update(Note note) async {
     return await datasource.update(note);
   }
 }

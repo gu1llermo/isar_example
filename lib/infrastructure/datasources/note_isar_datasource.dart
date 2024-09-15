@@ -24,23 +24,23 @@ class NoteIsarDatasource extends NotesDatasource {
   Future<Isar> get isarDb async => _isar ??= await initializeDb();
 
   @override
-  Future<bool> add(Note note) async {
+  Future<int> add(Note note) async {
     final isar = await isarDb;
-    await isar.writeTxn(() async {
-      await isar.noteIsars
+    final id = await isar.writeTxn(() async {
+      return await isar.noteIsars
           .put(NoteMapper.entityToNoteIsar(note)); // insert & update
     });
-    return true;
+    return id;
   }
 
   @override
-  Future<bool> delete(Note note) async {
+  Future<int> delete(Note note) async {
     final isar = await isarDb;
-    if (note.id == null) return true; // si es null entonces no hace nada
-    await isar.writeTxn(() async {
-      await isar.noteIsars.delete(note.id!); // delete
+    if (note.id == null) return -1; // si es null entonces no hace nada
+    final succes = await isar.writeTxn(() async {
+      return await isar.noteIsars.delete(note.id!); // delete
     });
-    return true;
+    return succes ? note.id! : -1;
   }
 
   @override
@@ -52,13 +52,13 @@ class NoteIsarDatasource extends NotesDatasource {
   }
 
   @override
-  Future<bool> update(Note note) async {
+  Future<int> update(Note note) async {
     final isar = await isarDb;
-    await isar.writeTxn(() async {
-      await isar.noteIsars
+    final id = await isar.writeTxn(() async {
+      return await isar.noteIsars
           .put(NoteMapper.entityToNoteIsar(note)); // insert & update
     });
-    return true;
+    return id;
   }
 
   @override
