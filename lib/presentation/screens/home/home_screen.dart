@@ -31,7 +31,10 @@ class HomeScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Todo example')),
+      appBar: AppBar(
+        centerTitle: true,
+        title: const Text('Todo example'),
+      ),
       body: const HomeView(),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
@@ -99,11 +102,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
         isLoading = false;
         _notesBackup = notes;
 
-        return FadeInUp(
+        return FadeInDown(
           duration: const Duration(milliseconds: 600),
           from: 50,
           child: ListView.builder(
-            padding: const EdgeInsets.only(bottom: 80),
+            padding: const EdgeInsets.only(bottom: 80, left: 5, right: 5),
             itemCount: notes.length,
             controller: scrollNotesController,
             itemBuilder: (context, index) {
@@ -124,7 +127,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         if (_notesBackup == null) {
           return const Center(child: CircularProgressIndicator());
         }
-        return FadeInDown(
+        return FadeInUp(
           duration: const Duration(milliseconds: 600),
           from: 50,
           child: Column(
@@ -211,13 +214,16 @@ class NoteView extends ConsumerWidget {
               extra: note,
             );
           },
-
           // trailing
           // trailing: IconButton(
-          //     onPressed: () {
-          //       ref.read(asyncNotesProvider.notifier).delete(note);
-          //     },
-          //     icon: const Icon(Icons.delete_forever)),
+          //   onPressed: () {},
+          //   icon: const Badge(
+          //     label: Text('Offline'),
+          //     backgroundColor: Colors.orangeAccent,
+          //     textColor: Colors.black87,
+          //     child: Icon(Icons.wifi),
+          //   ),
+          // ),
           leading: Checkbox(
             value: note.isCompleted,
             onChanged: isActive!
