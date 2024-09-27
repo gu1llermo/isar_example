@@ -30,4 +30,14 @@ class NoteRepositoryImpl extends NotesRepository {
   Future<int> update(Note note) async {
     return await datasource.update(note);
   }
+
+  @override
+  Future<void> addAll(List<Note> notes) async {
+    await datasource.addAll(notes);
+  }
+
+  @override
+  Future<void> clear() async {
+    await datasource.clear();
+  }
 }

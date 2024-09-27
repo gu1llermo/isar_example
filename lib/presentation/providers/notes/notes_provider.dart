@@ -32,6 +32,15 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     });
   }
 
+  Future<void> addAll(List<Note> notes) async {
+    // Set the state to loading
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _localNotesRepository.addAll(notes);
+      return await _fetchNotes();
+    });
+  }
+
   Future<void> updateNote(Note note) async {
     // Set the state to loading
     state = const AsyncValue.loading();
@@ -67,6 +76,15 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     // state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       await _localNotesRepository.delete(note);
+      return await _fetchNotes();
+    });
+  }
+
+  Future<void> clear() async {
+    // Set the state to loading
+    // state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      await _localNotesRepository.clear();
       return await _fetchNotes();
     });
   }

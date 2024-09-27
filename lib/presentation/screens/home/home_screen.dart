@@ -36,19 +36,38 @@ class HomeScreen extends ConsumerWidget {
         title: const Text('Todo example'),
       ),
       body: const HomeView(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          if (isLoading) {
-            showCustomSnackbar(context,
-                content: const Text('Sincronizando, espere un momento...'));
-            return;
-          }
-          context.push(
-            EditScreen.path,
-            extra: Note(),
-          );
-        },
-        child: const Icon(Icons.add),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'add',
+            onPressed: () {
+              if (isLoading) {
+                showCustomSnackbar(context,
+                    content: const Text('Sincronizando, espere un momento...'));
+                return;
+              }
+              context.push(
+                EditScreen.path,
+                extra: Note(),
+              );
+            },
+            child: const Icon(Icons.add),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'clear',
+            onPressed: () {
+              if (isLoading) {
+                showCustomSnackbar(context,
+                    content: const Text('Sincronizando, espere un momento...'));
+                return;
+              }
+              ref.read(asyncNotesProvider.notifier).clear();
+            },
+            child: const Icon(Icons.delete_forever),
+          ),
+        ],
       ),
     );
   }

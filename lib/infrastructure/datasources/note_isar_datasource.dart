@@ -69,4 +69,16 @@ class NoteIsarDatasource extends NotesDatasource {
     final note = NoteMapper.noteIsarToEntity(noteIsar);
     return note;
   }
+
+  @override
+  Future<void> addAll(List<Note> notes) {
+    // TODO: implement addAll
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> clear() {
+    // TODO: implement clear
+    throw UnimplementedError();
+  }
 }

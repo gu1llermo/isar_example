@@ -187,4 +187,16 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
 
     return id;
   }
+
+  @override
+  Future<void> addAll(List<Note> notes) {
+    // TODO: implement addAll
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<void> clear() {
+    // TODO: implement clear
+    throw UnimplementedError();
+  }
 }

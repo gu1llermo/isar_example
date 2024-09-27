@@ -57,6 +57,21 @@ class NoteSembastDatasource extends NotesDatasource {
   }
 
   @override
+  Future<void> addAll(List<Note> notes) async {
+    final db = await database;
+
+    await db.transaction((txn) async {
+      for (Note note in notes) {
+        int key = await store.add(txn, NoteMapper.entityToMap(note));
+
+        // tengo que hacer así para que la nota contenga el id respectivo
+        final noteCopy = note.copyWith(id: key);
+        await store.record(key).update(txn, NoteMapper.entityToMap(noteCopy));
+      }
+    });
+  }
+
+  @override
   Future<int> delete(Note note) async {
     if (note.id == null) return -1;
     final db = await database;
@@ -67,6 +82,12 @@ class NoteSembastDatasource extends NotesDatasource {
     // await store.delete(db, finder: Finder(filter: Filter.byKey(key)));
 
     return key;
+  }
+
+  @override
+  Future<void> clear() async {
+    final db = await database;
+    await store.delete(db);
   }
 
   @override
