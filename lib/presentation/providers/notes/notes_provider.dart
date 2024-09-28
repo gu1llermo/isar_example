@@ -17,7 +17,8 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
 
   @override
   FutureOr<List<Note>> build() async {
-    _localNotesRepository = ref.watch(localNotesRepositoryProvider);
+    _localNotesRepository = ref.watch(remoteNotesRepositoryProvider);
+    // _localNotesRepository = ref.watch(localNotesRepositoryProvider);
     // _remoteNotesRepository = ref.watch(remoteNotesRepositoryProvider);
     // print('Aquí');
     return await _fetchNotes();

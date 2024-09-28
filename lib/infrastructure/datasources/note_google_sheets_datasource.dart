@@ -8,12 +8,12 @@ import 'package:isar_example/infrastructure/mappers/note_mapper.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/add_note_response.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/get_all_notes_response.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/get_note_response.dart';
-import 'package:isar_example/infrastructure/models/google_sheets/google_sheets_exception.dart';
+// import 'package:isar_example/infrastructure/models/google_sheets/google_sheets_exception.dart';
 
 class NoteGoogleSheetsDatasource extends NotesDatasource {
   final dio = Dio();
   final baseUrl =
-      'https://script.google.com/macros/s/AKfycbw_2zzgn0t0xEV7sgoeSYGrU09kRaMW8SJI5OC76Y4GItuDXzD-I9TntCT_RdVLGgiA/exec';
+      'https://script.google.com/macros/s/AKfycbxLxXUbiWAS6ad6zgne6r_2IvnB3n6PgQDGuBqJCDGGy3sbCT7oPs4fl82K7ViNry3k/exec';
 
   @override
   Future<int> add(Note note) async {
@@ -113,37 +113,6 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     return notes;
   }
 
-  // @override
-  // Future<List<Note>> getAllNotes() async {
-  //   final bodyJson = jsonEncode({"comando": "getAllNotes"});
-  //   Response<dynamic>? response;
-  //   try {
-  //     response = await dio.post(
-  //         "https://script.google.com/macros/s/AKfycbwppOxEKIqUFVI4oDb-TpscfNdnza41gvJtTrgQfITNDMSZKDTZRLGl5k3lL70-l3NG/exec",
-  //         options: Options(
-  //           headers: {HttpHeaders.contentTypeHeader: "application/json"},
-  //         ),
-  //         data: bodyJson);
-  //   } on DioException catch (e) {
-  //     /// Handle redirect with code 302
-  //     if (e.response?.statusCode == 302) {
-  //       final url = e.response?.headers['location']!.first;
-  //       response = await dio.get(url!);
-  //     }
-  //   }
-  //   if (response == null) {
-  //     return [];
-  //   }
-
-  //   final notesResponse = NotesResponse.fromJson(response.data);
-
-  //   final List<Note> notes = notesResponse.data.notes
-  //       .map(NoteMapper.noteGoogleSheetsToEntity)
-  //       .toList();
-
-  //   return notes;
-  // }
-
   @override
   Future<Note?> getById(int id) async {
     final response = await doPost({
@@ -189,14 +158,36 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   }
 
   @override
-  Future<void> addAll(List<Note> notes) {
-    // TODO: implement addAll
-    throw UnimplementedError();
+  Future<void> addAll(List<Note> notes) async {
+    final response = await doPost({
+      "comando": "addAll",
+      "parametros": NoteMapper.listEntityToMap(notes),
+    });
+    if (response == null) {
+      return;
+    }
+
+    // final addResponse = AddNoteResponse.fromMap(response.data);
+
+    // final id = addResponse.data.id;
+
+    // return id;
   }
 
   @override
-  Future<void> clear() {
-    // TODO: implement clear
-    throw UnimplementedError();
+  Future<void> clear() async {
+    final response = await doPost({
+      "comando": "clearDb",
+    });
+    if (response == null) {
+      return;
+      //return -1; // significa que no se guardó
+    }
+
+    // final addResponse = AddNoteResponse.fromMap(response.data);
+
+    // final id = addResponse.data.id;
+
+    // return id;
   }
 }

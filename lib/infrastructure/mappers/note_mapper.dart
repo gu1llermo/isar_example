@@ -32,6 +32,10 @@ class NoteMapper {
         'timeStamp': note.timeStamp
       };
 
+  static Map<String, dynamic> listEntityToMap(List<Note> notes) => {
+        "notes": List<dynamic>.from(notes.map(entityToMap)),
+      };
+
   static Note noteGoogleSheetsToEntity(NoteGoogleSheets noteGoogleSheet) =>
       Note(
           id: noteGoogleSheet.id,
