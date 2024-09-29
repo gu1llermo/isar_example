@@ -118,6 +118,39 @@ class NoteSembastDatasource extends NotesDatasource {
   }
 
   @override
+  Future<void> deleteAll(List<Note> notes) async {
+    // aquí tengo que asumir que las notas ya tienen su id respectivo
+    // porque la idea es sincronizar el repositorio local con el remoto
+    // para que agregue aqui en el local, debería borrar previamente éste reposotio local
+
+    final db = await database;
+
+    await db.transaction((txn) async {
+      for (Note note in notes) {
+        int key = note.id!;
+        await _store.record(key).delete(txn);
+      }
+    });
+    await _checkIndex();
+  }
+
+  @override
+  Future<void> updateAll(List<Note> notes) async {
+    // aquí tengo que asumir que las notas ya tienen su id respectivo
+    // porque la idea es sincronizar el repositorio local con el remoto
+    // para que agregue aqui en el local, debería borrar previamente éste reposotio local
+
+    final db = await database;
+
+    await db.transaction((txn) async {
+      for (Note note in notes) {
+        int key = note.id!;
+        await _store.record(key).update(txn, NoteMapper.entityToMap(note));
+      }
+    });
+  }
+
+  @override
   Future<int> delete(Note note) async {
     if (note.id == null) return -1;
     final db = await database;

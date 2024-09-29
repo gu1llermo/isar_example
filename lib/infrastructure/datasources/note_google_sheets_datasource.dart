@@ -14,7 +14,7 @@ import 'package:isar_example/infrastructure/models/google_sheets/get_note_respon
 class NoteGoogleSheetsDatasource extends NotesDatasource {
   final dio = Dio();
   final baseUrl =
-      'https://script.google.com/macros/s/AKfycbxLxXUbiWAS6ad6zgne6r_2IvnB3n6PgQDGuBqJCDGGy3sbCT7oPs4fl82K7ViNry3k/exec';
+      'https://script.google.com/macros/s/AKfycbxvpf1mD0TvqUSLbbw0rYVBAdFx7m2SXuYzK-hIaJfnXxGRCduqI6HMsWdJT3IA3bRN/exec';
 
   @override
   Future<int> add(Note note) async {
@@ -180,15 +180,22 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       "comando": "addAll",
       "parametros": NoteMapper.listEntityToMap(notes),
     });
-    // if (response == null) {
-    //   return;
-    // }
+  }
 
-    // final addResponse = AddNoteResponse.fromMap(response.data);
+  @override
+  Future<void> deleteAll(List<Note> notes) async {
+    await doPost({
+      "comando": "deleteAll",
+      "parametros": NoteMapper.listEntityToMap(notes),
+    });
+  }
 
-    // final id = addResponse.data.id;
-
-    // return id;
+  @override
+  Future<void> updateAll(List<Note> notes) async {
+    await doPost({
+      "comando": "updateAll",
+      "parametros": NoteMapper.listEntityToMap(notes),
+    });
   }
 
   @override

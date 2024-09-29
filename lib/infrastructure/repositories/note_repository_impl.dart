@@ -37,6 +37,16 @@ class NoteRepositoryImpl extends NotesRepository {
   }
 
   @override
+  Future<void> deleteAll(List<Note> notes) async {
+    await datasource.deleteAll(notes);
+  }
+
+  @override
+  Future<void> updateAll(List<Note> notes) async {
+    await datasource.updateAll(notes);
+  }
+
+  @override
   Future<void> clear() async {
     await datasource.clear();
   }

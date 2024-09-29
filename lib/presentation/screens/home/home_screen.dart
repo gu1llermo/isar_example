@@ -22,6 +22,15 @@ void showCustomSnackbar(BuildContext context,
 
 bool isLoading = true;
 
+final notasPruebas = <Note>[
+  Note(title: 'Hola', id: 21),
+  Note(title: 'Mundo', id: 22),
+];
+final notasPruebasUpdate = <Note>[
+  Note(title: 'Hello', id: 21),
+  Note(title: 'World', id: 22),
+];
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
@@ -66,6 +75,47 @@ class HomeScreen extends ConsumerWidget {
               ref.read(asyncNotesProvider.notifier).clear();
             },
             child: const Icon(Icons.delete_forever),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'addAll', // todo addAll
+            onPressed: () {
+              if (isLoading) {
+                showCustomSnackbar(context,
+                    content: const Text('Sincronizando, espere un momento...'));
+                return;
+              }
+              ref.read(asyncNotesProvider.notifier).addAll(notasPruebas);
+            },
+            child: const Icon(Icons.add_a_photo_outlined),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'updateAll', // todo updateAll
+            onPressed: () {
+              if (isLoading) {
+                showCustomSnackbar(context,
+                    content: const Text('Sincronizando, espere un momento...'));
+                return;
+              }
+              ref
+                  .read(asyncNotesProvider.notifier)
+                  .updateAll(notasPruebasUpdate);
+            },
+            child: const Icon(Icons.update),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton(
+            heroTag: 'deleteAll', // todo deletAll
+            onPressed: () {
+              if (isLoading) {
+                showCustomSnackbar(context,
+                    content: const Text('Sincronizando, espere un momento...'));
+                return;
+              }
+              ref.read(asyncNotesProvider.notifier).deleteAll(notasPruebas);
+            },
+            child: const Icon(Icons.delete_sweep_rounded),
           ),
         ],
       ),

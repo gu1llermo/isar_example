@@ -25,6 +25,7 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   @override
   FutureOr<List<Note>> build() async {
     _remoteNotesRepository = ref.watch(remoteNotesRepositoryProvider);
+    // _localNotesRepository = ref.watch(remoteNotesRepositoryProvider);
     _localNotesRepository = ref.watch(localNotesRepositoryProvider);
 
     _createNotesRepository = ref.watch(createNotesRepositoryProvider);
@@ -46,7 +47,7 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     // cómo puedo agregar ésta nota al directorio remoto?
 
     // agrega a tareas pendientes por crear en el repositorio remoto
-    _createNotesRepository.add(note); // ya se agregó al repositorio
+    //_createNotesRepository.add(note); // ya se agregó al repositorio
     // de tareas pendientes por agregar al repositorio remoto
 
     //debugPrint('Hola');
@@ -57,6 +58,22 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     state = const AsyncValue.loading();
 
     await _localNotesRepository.addAll(notes);
+    _fetchNotes();
+  }
+
+  Future<void> updateAll(List<Note> notes) async {
+    // Set the state to loading
+    state = const AsyncValue.loading();
+
+    await _localNotesRepository.updateAll(notes);
+    _fetchNotes();
+  }
+
+  Future<void> deleteAll(List<Note> notes) async {
+    // Set the state to loading
+    state = const AsyncValue.loading();
+
+    await _localNotesRepository.deleteAll(notes);
     _fetchNotes();
   }
 
