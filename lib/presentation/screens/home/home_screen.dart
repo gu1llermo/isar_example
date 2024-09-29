@@ -138,7 +138,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         );
       },
       error: (error, stackTrace) {
+        // debugPrint(stackTrace.toString());
         isLoading = false;
+
         return Center(child: Text('Error: $error'));
       },
       loading: () {
@@ -217,7 +219,7 @@ class NoteView extends ConsumerWidget {
         child: ListTile(
           enabled: isActive!,
           title: Text(
-            note.title,
+            '${note.id}.- ${note.title}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),

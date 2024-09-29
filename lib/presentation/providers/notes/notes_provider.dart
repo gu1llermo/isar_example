@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
@@ -9,55 +10,70 @@ final asyncNotesProvider =
 
 class NotesNotifier extends AsyncNotifier<List<Note>> {
   late NoteRepositoryImpl _localNotesRepository;
-  // late NoteRepositoryImpl _remoteNotesRepository;
+  late NoteRepositoryImpl _remoteNotesRepository;
 
-  Future<List<Note>> _fetchNotes() async {
-    return await getAllNotes();
+  late NoteRepositoryImpl _createNotesRepository;
+  late NoteRepositoryImpl _updateNotesRepository;
+  late NoteRepositoryImpl _deleteNotesRepository;
+
+  Future<void> _fetchNotes() async {
+    state = await AsyncValue.guard(() async {
+      return await getAllNotes();
+    });
   }
 
   @override
   FutureOr<List<Note>> build() async {
-    _localNotesRepository = ref.watch(remoteNotesRepositoryProvider);
-    // _localNotesRepository = ref.watch(localNotesRepositoryProvider);
-    // _remoteNotesRepository = ref.watch(remoteNotesRepositoryProvider);
-    // print('Aquí');
-    return await _fetchNotes();
+    _remoteNotesRepository = ref.watch(remoteNotesRepositoryProvider);
+    _localNotesRepository = ref.watch(localNotesRepositoryProvider);
+
+    _createNotesRepository = ref.watch(createNotesRepositoryProvider);
+    _updateNotesRepository = ref.watch(updateNotesRepositoryProvider);
+    _deleteNotesRepository = ref.watch(deleteNotesRepositoryProvider);
+
+    return await getAllNotes();
   }
 
   Future<void> add(Note note) async {
     // Set the state to loading
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _localNotesRepository.add(note);
-      return await _fetchNotes();
-    });
+    await _localNotesRepository.add(note);
+    _fetchNotes();
+    // aquí debería primero intentar agregar esa nota
+    // al repositorio remoto
+    // en acso que falle se agrega a la lista de tareas
+    // pendientes por agregar
+    // cómo puedo agregar ésta nota al directorio remoto?
+
+    // agrega a tareas pendientes por crear en el repositorio remoto
+    _createNotesRepository.add(note); // ya se agregó al repositorio
+    // de tareas pendientes por agregar al repositorio remoto
+
+    //debugPrint('Hola');
   }
 
   Future<void> addAll(List<Note> notes) async {
     // Set the state to loading
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _localNotesRepository.addAll(notes);
-      return await _fetchNotes();
-    });
+
+    await _localNotesRepository.addAll(notes);
+    _fetchNotes();
   }
 
   Future<void> updateNote(Note note) async {
     // Set the state to loading
     state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _localNotesRepository.update(note);
-      return await _fetchNotes();
-    });
+
+    await _localNotesRepository.update(note);
+    _fetchNotes();
   }
 
   Future<void> toggle(Note note) async {
     // state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      final noteToggled = note.copyWith(isCompleted: !note.isCompleted);
-      await _localNotesRepository.update(noteToggled);
-      return await _fetchNotes();
-    });
+
+    final noteToggled = note.copyWith(isCompleted: !note.isCompleted);
+    await _localNotesRepository.update(noteToggled);
+    _fetchNotes();
   }
 
   FutureOr<List<Note>> getAllNotes() async {
@@ -75,18 +91,16 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   Future<void> delete(Note note) async {
     // Set the state to loading
     // state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _localNotesRepository.delete(note);
-      return await _fetchNotes();
-    });
+
+    await _localNotesRepository.delete(note);
+    _fetchNotes();
   }
 
   Future<void> clear() async {
     // Set the state to loading
     // state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
-      await _localNotesRepository.clear();
-      return await _fetchNotes();
-    });
+
+    await _localNotesRepository.clear();
+    _fetchNotes();
   }
 }

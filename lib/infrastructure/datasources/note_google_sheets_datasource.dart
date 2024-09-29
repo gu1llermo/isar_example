@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:isar_example/domain/datasources/notes_datasource.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/mappers/note_mapper.dart';
@@ -23,11 +24,11 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    if (response == null) {
-      return -1; // significa que no se guardó
-    }
+    // if (response == null) {
+    //   return -1; // significa que no se guardó
+    // }
 
-    final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response!.data);
 
     final id = addResponse.data.id;
 
@@ -42,11 +43,11 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    if (response == null) {
-      return -1; // significa que no se guardó
-    }
+    // if (response == null) {
+    //   return -1; // significa que no se guardó
+    // }
 
-    final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response!.data);
 
     final id = addResponse.data.id;
 
@@ -78,21 +79,41 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   // }
 
   Future<Response<dynamic>?> doPost(Map<String, dynamic> body) async {
+    //checkConectivity();
     final bodyJson = jsonEncode(body);
     Response<dynamic>? response;
     try {
-      response = await dio.post(baseUrl,
-          options: Options(
-            headers: {HttpHeaders.contentTypeHeader: "application/json"},
-          ),
-          data: bodyJson);
+      response = await dio.post(
+        baseUrl,
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: bodyJson,
+      );
     } on DioException catch (e) {
-      /// Handle redirect with code 302
+      // Handle redirect with code 302
       if (e.response?.statusCode == 302) {
         final url = e.response?.headers['location']!.first;
-        response = await dio.get(url!);
+        response = await redirectDoGet(url!);
+      } else {
+        throw 'No hay conexión a internet :/';
       }
+      // else if (e.type == DioExceptionType.connectionError) {
+      //   debugPrint('No hay internet aquí');
+      // } else if (e.type == DioExceptionType.connectionTimeout) {
+      //   debugPrint('Se acabó el tiempo de esperar, timeOut');
+      // } else {
+      //   debugPrint('error type: ${e.type.toString()}');
+      // }
     }
+    return response;
+  }
+
+  Future<Response<dynamic>?> redirectDoGet(String url) async {
+    Response<dynamic>? response;
+
+    response = await dio.get(url);
+
     return response;
   }
 
@@ -100,11 +121,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   Future<List<Note>> getAllNotes() async {
     final response = await doPost({"comando": "getAllNotes"});
 
-    if (response == null) {
-      throw 'No hay conexión a internet';
-    }
-
-    final notesResponse = GetAllNotesResponse.fromJson(response.data);
+    final notesResponse = GetAllNotesResponse.fromJson(response!.data);
 
     final List<Note> notes = notesResponse.data.notes
         .map(NoteMapper.noteGoogleSheetsToEntity)
@@ -122,15 +139,15 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       }
     });
 
-    if (response == null) {
-      throw 'No hay conexión a internet';
-    }
+    // if (response == null) {
+    //   throw 'No hay conexión a internet';
+    // }
 
-    final noteResponse = GetNoteResponse.fromJson(response.data);
+    final noteResponse = GetNoteResponse.fromJson(response!.data);
 
     final noteGoogleSheet = noteResponse.data.note;
     if (noteGoogleSheet == null) {
-      return null;
+      return null; // es que no consiguió la nota
     }
 
     final note = NoteMapper.noteGoogleSheetsToEntity(noteGoogleSheet);
@@ -146,11 +163,11 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    if (response == null) {
-      return -1; // significa que no se guardó
-    }
+    // if (response == null) {
+    //   return -1; // significa que no se guardó
+    // }
 
-    final addResponse = AddNoteResponse.fromMap(response.data);
+    final addResponse = AddNoteResponse.fromMap(response!.data);
 
     final id = addResponse.data.id;
 
@@ -159,13 +176,13 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
 
   @override
   Future<void> addAll(List<Note> notes) async {
-    final response = await doPost({
+    await doPost({
       "comando": "addAll",
       "parametros": NoteMapper.listEntityToMap(notes),
     });
-    if (response == null) {
-      return;
-    }
+    // if (response == null) {
+    //   return;
+    // }
 
     // final addResponse = AddNoteResponse.fromMap(response.data);
 
@@ -176,13 +193,15 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
 
   @override
   Future<void> clear() async {
-    final response = await doPost({
+    await doPost({
       "comando": "clearDb",
     });
-    if (response == null) {
-      return;
-      //return -1; // significa que no se guardó
-    }
+
+    // if (response == null) {
+    //   debugPrint('Pasé por aquí');
+    //   return;
+    //   //return -1; // significa que no se guardó
+    // }
 
     // final addResponse = AddNoteResponse.fromMap(response.data);
 

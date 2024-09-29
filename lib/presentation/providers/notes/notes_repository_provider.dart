@@ -5,7 +5,28 @@ import 'package:isar_example/infrastructure/repositories/note_repository_impl.da
 import '../../../infrastructure/datasources/note_sembast_datasource.dart';
 
 final localNotesRepositoryProvider =
-    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource()));
+    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource(
+          nameStore: 'note_sembast_store',
+          nameDb: 'notes.db',
+        )));
+
+final createNotesRepositoryProvider =
+    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource(
+          nameStore: 'create_store',
+          nameDb: 'create.db',
+        )));
+
+final updateNotesRepositoryProvider =
+    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource(
+          nameStore: 'update_store',
+          nameDb: 'update.db',
+        )));
+
+final deleteNotesRepositoryProvider =
+    Provider((ref) => NoteRepositoryImpl(NoteSembastDatasource(
+          nameStore: 'delete_store',
+          nameDb: 'delete.db',
+        )));
 
 final remoteNotesRepositoryProvider =
     Provider((ref) => NoteRepositoryImpl(NoteGoogleSheetsDatasource()));
