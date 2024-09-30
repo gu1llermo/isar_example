@@ -50,4 +50,19 @@ class NoteRepositoryImpl extends NotesRepository {
   Future<void> clear() async {
     await datasource.clear();
   }
+
+  @override
+  Future<int> getLastUpdate() async {
+    return await datasource.getLastUpdate();
+  }
+
+  @override
+  Future<void> setLastUpdate(int lastUpdate) async {
+    await datasource.setLastUpdate(lastUpdate);
+  }
+
+  @override
+  String getPrefixIndex() {
+    return datasource.getPrefixIndex();
+  }
 }

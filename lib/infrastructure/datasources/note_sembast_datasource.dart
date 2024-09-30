@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:isar_example/infrastructure/mappers/note_mapper.dart';
-import 'package:sembast/sembast.dart';
+
 import 'package:sembast/sembast_io.dart';
 import 'package:sembast/sembast_memory.dart';
 import 'package:sembast_web/sembast_web.dart';
@@ -18,7 +18,10 @@ class NoteSembastDatasource extends NotesDatasource {
   late StoreRef<int, Map<String, Object?>> _store;
   late StoreRef<Object?, Object?> _preferenceStore;
   int? _index;
-  static const int _indexInicial = 10;
+  static const String _prefixIndex = '2';
+  static const int _indexInicial = 0;
+
+  static const int _lastUpdateInicial = 0;
 
   NoteSembastDatasource({required this.nameStore, required this.nameDb}) {
     _store = intMapStoreFactory.store(nameStore);
@@ -28,8 +31,10 @@ class NoteSembastDatasource extends NotesDatasource {
   Future<int> _initIndex() async {
     final db = await database;
     return await _preferenceStore.record('index').get(db) as int? ??
-        _indexInicial;
+        int.parse('$_prefixIndex$_indexInicial');
+    // _indexInicial;
   }
+
   // localDatabes siempre empieza en 0 su id, así 10 es el id 0
   // esto es para diferenciarlo del remote id, porque estoy trabajando con int
 
@@ -40,7 +45,7 @@ class NoteSembastDatasource extends NotesDatasource {
 
     final indexTxt = i.toString();
     final result = indexTxt.substring(1, indexTxt.length);
-    final indexResult = '1${(int.parse(result) + 1).toString()}';
+    final indexResult = '$_prefixIndex${(int.parse(result) + 1).toString()}';
     final newIndex = int.parse(indexResult);
 
     await _saveIndex(newIndex);
@@ -79,10 +84,15 @@ class NoteSembastDatasource extends NotesDatasource {
   }
 
   @override
+  String getPrefixIndex() {
+    return _prefixIndex;
+  }
+
+  @override
   Future<int> add(Note note) async {
     final db = await database;
 
-    final int key = await _getNewindex();
+    final int key = note.id ?? await _getNewindex();
     await db.transaction((txn) async {
       //key = await _store.add(txn, NoteMapper.entityToMap(note));
 
@@ -131,7 +141,6 @@ class NoteSembastDatasource extends NotesDatasource {
         await _store.record(key).delete(txn);
       }
     });
-    await _checkIndex();
   }
 
   @override
@@ -157,25 +166,25 @@ class NoteSembastDatasource extends NotesDatasource {
     final key = note.id!;
 
     await _store.record(key).delete(db);
-    await _checkIndex();
+
     // await store.delete(db, finder: Finder(filter: Filter.byKey(key)));
 
     return key;
   }
 
-  Future<void> _checkIndex() async {
-    // hago esto porque es local
-    final allNotes = await getAllNotes();
-    if (allNotes.isEmpty) {
-      await _saveIndex(_indexInicial);
-    }
-  }
+  // Future<void> _checkIndex() async {// lo quité porque quiero que sea único
+  // lo va a manejar varias fuentes
+  //   // hago esto porque es local
+  //   final allNotes = await getAllNotes();
+  //   if (allNotes.isEmpty) {
+  //     await _saveIndex(_indexInicial);
+  //   }
+  // }
 
   @override
   Future<void> clear() async {
     final db = await database;
     await _store.delete(db);
-    await _saveIndex(_indexInicial);
   }
 
   @override
@@ -185,6 +194,8 @@ class NoteSembastDatasource extends NotesDatasource {
     final listNotes = snapshots
         .map((snapshot) => NoteMapper.mapToEntity(snapshot.value))
         .toList();
+    // listNotes
+    //     .sort((note1, note2) => note2.timeStamp!.compareTo(note1.timeStamp!));
     return listNotes;
   }
 
@@ -209,5 +220,20 @@ class NoteSembastDatasource extends NotesDatasource {
     // await store.update(db, NoteMapper.entityToMap(note),
     //     finder: Finder(filter: Filter.byKey(key)));
     return key;
+  }
+
+  @override
+  Future<int> getLastUpdate() async {
+    final db = await database;
+    final lastUpdate =
+        await _preferenceStore.record('lastUpdate').get(db) as int? ??
+            _lastUpdateInicial;
+    return lastUpdate;
+  }
+
+  @override
+  Future<void> setLastUpdate(int lastUpdate) async {
+    final db = await database;
+    await _preferenceStore.record('lastUpdate').put(db, lastUpdate);
   }
 }

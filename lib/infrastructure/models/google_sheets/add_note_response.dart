@@ -39,16 +39,17 @@ class AddNoteResponse {
 
 class Data {
   final int id;
+  final int? lastUpdate;
 
-  Data({
-    required this.id,
-  });
+  Data({required this.id, this.lastUpdate});
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-        id: json["id"],
+        id: json["id"] ?? 0,
+        lastUpdate: json["lastUpdate"] ?? 0,
       );
 
   Map<String, dynamic> toJson() => {
         "id": id,
+        "lastUpdate": lastUpdate,
       };
 }

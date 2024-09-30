@@ -14,7 +14,9 @@ import 'package:isar_example/infrastructure/models/google_sheets/get_note_respon
 class NoteGoogleSheetsDatasource extends NotesDatasource {
   final dio = Dio();
   final baseUrl =
-      'https://script.google.com/macros/s/AKfycbxvpf1mD0TvqUSLbbw0rYVBAdFx7m2SXuYzK-hIaJfnXxGRCduqI6HMsWdJT3IA3bRN/exec';
+      'https://script.google.com/macros/s/AKfycbwRcg0DH8N9aLuIbplyP9HmtxOZ7WTd47IBNulqtl2KbBzRKgR0vCGK7h7xQQwVigH8/exec';
+  int _lastUpdateBackup = 0;
+  static const String _prefixIndex = '1';
 
   @override
   Future<int> add(Note note) async {
@@ -27,12 +29,44 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     // if (response == null) {
     //   return -1; // significa que no se guardó
     // }
+    try {
+      final addResponse = AddNoteResponse.fromMap(response!.data);
+      final id = addResponse.data.id;
+      return id;
+    } on Exception {
+      rethrow;
+    }
+  }
 
-    final addResponse = AddNoteResponse.fromMap(response!.data);
+  @override
+  String getPrefixIndex() {
+    return _prefixIndex;
+  }
 
-    final id = addResponse.data.id;
+  @override
+  Future<int> getLastUpdate() async {
+    final response = await doPost({
+      "comando": "getLastUpdate",
+    });
 
-    return id;
+    if (response! is String) {
+      return _lastUpdateBackup;
+    } else {
+      final addResponse = AddNoteResponse.fromMap(response!.data);
+
+      final lastUpdate = addResponse.data.lastUpdate!;
+      _lastUpdateBackup = lastUpdate;
+      return lastUpdate;
+    }
+    // try {
+    //   final addResponse = AddNoteResponse.fromMap(response!.data);
+
+    //   final lastUpdate = addResponse.data.lastUpdate!;
+    //   _lastUpdateBackup = lastUpdate;
+    //   return lastUpdate;
+    // } on Exception {
+    //   return _lastUpdateBackup;
+    // }
   }
 
   @override
@@ -47,11 +81,13 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     //   return -1; // significa que no se guardó
     // }
 
-    final addResponse = AddNoteResponse.fromMap(response!.data);
-
-    final id = addResponse.data.id;
-
-    return id;
+    try {
+      final addResponse = AddNoteResponse.fromMap(response!.data);
+      final id = addResponse.data.id;
+      return id;
+    } on Exception {
+      rethrow;
+    }
   }
 
   // @override
@@ -96,7 +132,8 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         final url = e.response?.headers['location']!.first;
         response = await redirectDoGet(url!);
       } else {
-        throw 'No hay conexión a internet :/';
+        rethrow;
+        //throw e.message ?? 'No hay conexión a internet :(';
       }
       // else if (e.type == DioExceptionType.connectionError) {
       //   debugPrint('No hay internet aquí');
@@ -121,13 +158,15 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
   Future<List<Note>> getAllNotes() async {
     final response = await doPost({"comando": "getAllNotes"});
 
-    final notesResponse = GetAllNotesResponse.fromJson(response!.data);
-
-    final List<Note> notes = notesResponse.data.notes
-        .map(NoteMapper.noteGoogleSheetsToEntity)
-        .toList();
-
-    return notes;
+    try {
+      final notesResponse = GetAllNotesResponse.fromJson(response!.data);
+      final List<Note> notes = notesResponse.data.notes
+          .map(NoteMapper.noteGoogleSheetsToEntity)
+          .toList();
+      return notes;
+    } on Exception {
+      rethrow;
+    }
   }
 
   @override
@@ -139,20 +178,17 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       }
     });
 
-    // if (response == null) {
-    //   throw 'No hay conexión a internet';
-    // }
-
-    final noteResponse = GetNoteResponse.fromJson(response!.data);
-
-    final noteGoogleSheet = noteResponse.data.note;
-    if (noteGoogleSheet == null) {
-      return null; // es que no consiguió la nota
+    try {
+      final noteResponse = GetNoteResponse.fromJson(response!.data);
+      final noteGoogleSheet = noteResponse.data.note;
+      if (noteGoogleSheet == null) {
+        return null; // es que no consiguió la nota
+      }
+      final note = NoteMapper.noteGoogleSheetsToEntity(noteGoogleSheet);
+      return note;
+    } on Exception {
+      rethrow;
     }
-
-    final note = NoteMapper.noteGoogleSheetsToEntity(noteGoogleSheet);
-
-    return note;
   }
 
   @override
@@ -163,15 +199,14 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    // if (response == null) {
-    //   return -1; // significa que no se guardó
-    // }
 
-    final addResponse = AddNoteResponse.fromMap(response!.data);
-
-    final id = addResponse.data.id;
-
-    return id;
+    try {
+      final addResponse = AddNoteResponse.fromMap(response!.data);
+      final id = addResponse.data.id;
+      return id;
+    } on Exception {
+      rethrow;
+    }
   }
 
   @override
@@ -215,5 +250,10 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     // final id = addResponse.data.id;
 
     // return id;
+  }
+
+  @override
+  Future<void> setLastUpdate(int lastUpdate) {
+    throw 'No deberías implementar ésta función de setLastUpdate en remoteRepository';
   }
 }

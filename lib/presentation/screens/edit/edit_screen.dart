@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar_example/config/helpers/tools.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/presentation/providers/notes/notes_provider.dart';
 
@@ -97,13 +98,11 @@ class _EditViewState extends ConsumerState<EditView> {
       content = _contentController.text;
     }
     if (isNewNote(note)) {
-      ref
-          .read(asyncNotesProvider.notifier)
-          .add(note.copyWith(title: title, content: content));
+      ref.read(asyncNotesProvider.notifier).add(note.copyWith(
+          title: title, content: content, timeStamp: getTimeStamp()));
     } else {
-      ref
-          .read(asyncNotesProvider.notifier)
-          .updateNote(note.copyWith(title: title, content: content));
+      ref.read(asyncNotesProvider.notifier).updateNote(note.copyWith(
+          title: title, content: content, timeStamp: getTimeStamp()));
     }
   }
 
