@@ -46,7 +46,9 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     _deleteNotesRepository = ref.watch(deleteNotesRepositoryProvider);
 
     // tienes que hacerlo así, cada vez que inicia la app, se inicia éste chequeo
-    _timer ??= Timer.periodic(Duration(seconds: 5), (timer) async {
+    // con 10 segundos trabaja bien,pero le coloqué 3 mnutos porque no hay prisa
+    // para actualizar
+    _timer ??= Timer.periodic(Duration(minutes: 3), (timer) async {
       if (await hasNotesPendingForSync()) {
         await _lock.synchronized(() async => await syncPendingNotes());
       } else {
