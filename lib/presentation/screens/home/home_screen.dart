@@ -266,25 +266,25 @@ class NoteView extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final timeStamp = convertTimeStamp(note.timeStamp!);
+    // final timeStamp = convertTimeStamp(note.timeStamp!);
 
     return Dismissible(
       key: ValueKey(note.id.toString()),
       onDismissed: (direction) async {
         await ref.read(asyncNotesProvider.notifier).delete(note);
-        //moveScrollNotes(scrollController);
       },
       child: Card(
         elevation: 3,
         child: ListTile(
           enabled: isActive!,
           title: Text(
-            '${note.id}.- ${note.title}',
+            note.title,
+            // '${note.id}.- ${note.title}',
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            '$timeStamp${note.content}',
+            note.content,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),

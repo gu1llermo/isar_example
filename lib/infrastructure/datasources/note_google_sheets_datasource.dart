@@ -26,9 +26,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    // if (response == null) {
-    //   return -1; // significa que no se guardó
-    // }
+
     try {
       final addResponse = AddNoteResponse.fromMap(response!.data);
       final id = addResponse.data.id;
@@ -59,15 +57,6 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
       _lastUpdateBackup = lastUpdate;
       return lastUpdate;
     }
-    // try {
-    //   final addResponse = AddNoteResponse.fromMap(response!.data);
-
-    //   final lastUpdate = addResponse.data.lastUpdate!;
-    //   _lastUpdateBackup = lastUpdate;
-    //   return lastUpdate;
-    // } on Exception {
-    //   return _lastUpdateBackup;
-    // }
   }
 
   @override
@@ -206,18 +195,6 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     await doPost({
       "comando": "clearDb",
     });
-
-    // if (response == null) {
-    //   debugPrint('Pasé por aquí');
-    //   return;
-    //   //return -1; // significa que no se guardó
-    // }
-
-    // final addResponse = AddNoteResponse.fromMap(response.data);
-
-    // final id = addResponse.data.id;
-
-    // return id;
   }
 
   @override
