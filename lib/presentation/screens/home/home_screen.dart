@@ -195,43 +195,53 @@ class _HomeViewState extends ConsumerState<HomeView> {
         return Center(child: Text('Error: $error'));
       },
       loading: () {
-        isLoading = true;
-        if (_notesBackup == null) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        return FadeInUp(
-          duration: const Duration(milliseconds: 600),
-          from: 50,
-          child: Column(
+        isLoading =
+            true; // no haría falta ésta bandera al colocar el circular indicator así
+        return Padding(
+          padding: const EdgeInsets.all(10.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const SizedBox(height: 2),
-              const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Sincronizando... '),
-                  CircularProgressIndicator(),
-                ],
-              ),
-              const SizedBox(height: 2),
-              Expanded(
-                child: ListView.builder(
-                  padding: const EdgeInsets.only(bottom: 80),
-                  itemCount: _notesBackup!.length,
-                  controller: scrollNotesController,
-                  itemBuilder: (context, index) {
-                    final indice = (_notesBackup!.length) - index - 1;
-                    final note = _notesBackup![indice];
-                    return NoteView(
-                      note: note,
-                      scrollController: scrollNotesController,
-                      isActive: false,
-                    );
-                  },
-                ),
-              ),
+              CircularProgressIndicator(),
             ],
           ),
         );
+        // if (_notesBackup == null) {
+        //   return const Center(child: CircularProgressIndicator());
+        // }
+        // return FadeInUp(
+        //   duration: const Duration(milliseconds: 600),
+        //   from: 50,
+        //   child: Column(
+        //     children: [
+        //       const SizedBox(height: 2),
+        //       const Row(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: [
+        //           Text('Sincronizando... '),
+        //           CircularProgressIndicator(),
+        //         ],
+        //       ),
+        //       const SizedBox(height: 2),
+        //       Expanded(
+        //         child: ListView.builder(
+        //           padding: const EdgeInsets.only(bottom: 80),
+        //           itemCount: _notesBackup!.length,
+        //           controller: scrollNotesController,
+        //           itemBuilder: (context, index) {
+        //             final indice = (_notesBackup!.length) - index - 1;
+        //             final note = _notesBackup![indice];
+        //             return NoteView(
+        //               note: note,
+        //               scrollController: scrollNotesController,
+        //               isActive: false,
+        //             );
+        //           },
+        //         ),
+        //       ),
+        //     ],
+        //   ),
+        // );
       },
       // loading: () => const Center(child: CircularProgressIndicator()),
     );
