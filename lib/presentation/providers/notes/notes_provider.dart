@@ -45,24 +45,15 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     _updateNotesRepository = ref.watch(updateNotesRepositoryProvider);
     _deleteNotesRepository = ref.watch(deleteNotesRepositoryProvider);
 
-    // tienes que hacerlo así, cada vez que inicia la app, se iniicia éste chequeo
+    // tienes que hacerlo así, cada vez que inicia la app, se inicia éste chequeo
     _timer ??= Timer.periodic(Duration(seconds: 5), (timer) async {
       if (await hasNotesPendingForSync()) {
-        // try {
         await _lock.synchronized(() async => await syncPendingNotes());
-        // await syncPendingNotes();
-
-        // await _syncLocalRepository();
-        // await _fetchNotes();
-
-        // } on DioException  {
-        //   //
-        // }
       } else {
         if (await hasUpdate()) {
           try {
             await _lock.synchronized(() async => await _syncLocalRepository());
-            // await _syncLocalRepository();
+
             await _fetchNotes();
           } on DioException catch (e) {
             // no haces nada, problemas con el internet
