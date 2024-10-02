@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/repositories/note_repository_impl.dart';
 import 'package:isar_example/presentation/providers/notes/notes_repository_provider.dart';
@@ -18,6 +19,8 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   late NoteRepositoryImpl _deleteNotesRepository;
 
   Timer? _timer;
+  // bool _isBusy = false;
+  final _lock = Lock();
 
   Future<void> _fetchNotes() async {
     state = await AsyncValue.guard(() async {
@@ -43,10 +46,11 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
     _deleteNotesRepository = ref.watch(deleteNotesRepositoryProvider);
 
     // tienes que hacerlo así, cada vez que inicia la app, se iniicia éste chequeo
-    _timer ??= Timer.periodic(Duration(seconds: 10), (timer) async {
+    _timer ??= Timer.periodic(Duration(seconds: 5), (timer) async {
       if (await hasNotesPendingForSync()) {
         // try {
-        await syncPendingNotes();
+        await _lock.synchronized(() async => await syncPendingNotes());
+        // await syncPendingNotes();
 
         // await _syncLocalRepository();
         // await _fetchNotes();
@@ -57,19 +61,22 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
       } else {
         if (await hasUpdate()) {
           try {
-            await _syncLocalRepository();
+            await _lock.synchronized(() async => await _syncLocalRepository());
+            // await _syncLocalRepository();
             await _fetchNotes();
-          } on DioException {
+          } on DioException catch (e) {
             // no haces nada, problemas con el internet
+            debugPrint(e.message ?? 'error en la conexión');
           }
         }
       }
     });
-    _timer;
+
     try {
       await _syncLocalRepository();
-    } on Exception {
+    } on DioException catch (e) {
       // no haces nada
+      debugPrint(e.message ?? 'error en la conexión');
     }
 
     return await getAllNotes();
@@ -89,6 +96,8 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   }
 
   Future<void> syncPendingNotes() async {
+    // if (_isBusy) return;
+    // _isBusy = true;
     try {
       await _syncNotesCreated();
       await _syncNotesUpdated();
@@ -99,9 +108,11 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
 
       // todo setear momento de sincronización
     } on DioException {
+      // _isBusy = false;
       //debugPrint(e.message ?? 'Problema de conexión');
       // no me interesa hacer nada porque simplemente no hay conexión a internet
     }
+    // _isBusy = false; // creo que podría usr finally pero no estoy seguro
   }
 
   Future<void> _syncNotesCreated() async {
@@ -126,6 +137,8 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
   }
 
   Future<void> _syncLocalRepository() async {
+    // if (_isBusy) return;
+    // _isBusy = true;
     try {
       // debo llamar a todas las notas en la nube
       // además del tiempo de sincronización y guardar ese registro
@@ -140,8 +153,10 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
 
       // _fetchNotes();
     } on DioException {
+      // _isBusy = false;
       rethrow;
     }
+    // _isBusy = false;
   }
 
   Future<void> add(Note note) async {
@@ -152,23 +167,14 @@ class NotesNotifier extends AsyncNotifier<List<Note>> {
 
     final id = await _localNotesRepository.add(note);
 
-    // aquí debería primero intentar agregar esa nota
-    // al repositorio remoto
-    // en acso que falle se agrega a la lista de tareas
-    // pendientes por agregar
-    // cómo puedo agregar ésta nota al directorio remoto?
-
-    // agrega a tareas pendientes por crear en el repositorio remoto
     final noteCopy = note.copyWith(id: id);
-
-    // state = await AsyncValue.guard(() async {
-    //   return [...notas, noteCopy];
-    // });
 
     await agregaANotesPendientesPorCrear(noteCopy); // lo agrego al repositorio
     // de tareas pendientes por agregar al repositorio remoto
 
-    //debugPrint('Hola');
+    // await _localNotesRepository.clear();
+    // await _localNotesRepository.addAll([...notas, noteCopy]);
+
     await _fetchNotes();
   }
 

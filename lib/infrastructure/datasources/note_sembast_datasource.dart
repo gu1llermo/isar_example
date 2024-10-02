@@ -194,8 +194,8 @@ class NoteSembastDatasource extends NotesDatasource {
     final listNotes = snapshots
         .map((snapshot) => NoteMapper.mapToEntity(snapshot.value))
         .toList();
-    // listNotes
-    //     .sort((note1, note2) => note2.timeStamp!.compareTo(note1.timeStamp!));
+    listNotes
+        .sort((note1, note2) => note1.timeStamp!.compareTo(note2.timeStamp!));
     return listNotes;
   }
 

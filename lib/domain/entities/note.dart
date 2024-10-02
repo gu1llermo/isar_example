@@ -16,7 +16,7 @@ class Note {
     this.isCompleted = false,
     this.timeStamp,
   }) {
-    timeStamp = getTimeStamp();
+    timeStamp ??= getTimeStamp();
   }
 
   Note copyWith({

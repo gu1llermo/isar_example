@@ -2,19 +2,19 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
+// import 'package:flutter/foundation.dart';
 import 'package:isar_example/domain/datasources/notes_datasource.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/infrastructure/mappers/note_mapper.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/add_note_response.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/get_all_notes_response.dart';
 import 'package:isar_example/infrastructure/models/google_sheets/get_note_response.dart';
-// import 'package:isar_example/infrastructure/models/google_sheets/google_sheets_exception.dart';
 
 class NoteGoogleSheetsDatasource extends NotesDatasource {
   final dio = Dio();
   final baseUrl =
-      'https://script.google.com/macros/s/AKfycbwRcg0DH8N9aLuIbplyP9HmtxOZ7WTd47IBNulqtl2KbBzRKgR0vCGK7h7xQQwVigH8/exec';
+      'https://script.google.com/macros/s/AKfycbwdurgujwVbsqgzqBWNRAIIu-G2Ix3kREiEdFjj5yckP2XKAP436oWyouzB_0XEhoaV/exec';
+
   int _lastUpdateBackup = 0;
   static const String _prefixIndex = '1';
 
@@ -50,6 +50,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     });
 
     if (response! is String) {
+      // es porque hubo un error en la recepción
       return _lastUpdateBackup;
     } else {
       final addResponse = AddNoteResponse.fromMap(response!.data);
@@ -77,9 +78,6 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         "note": NoteMapper.entityToMap(note),
       }
     });
-    // if (response == null) {
-    //   return -1; // significa que no se guardó
-    // }
 
     try {
       final addResponse = AddNoteResponse.fromMap(response!.data);
@@ -90,39 +88,17 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
     }
   }
 
-  // @override
-  // Future<List<Note>> getAllNotes() async {
-  //   Response<dynamic>? response;
-  //   try {
-  //     response = await dio.get(
-  //         "https://script.google.com/macros/s/AKfycby4PAfuY7tWghKPIJKa1QJ_phceHDUNbWtByh-d8QP4c3Qun1gGBNwElPaP-AqcxfxP/exec",
-  //         queryParameters: {"comando": "getAllNotes"});
-  //   } on DioException catch (e) {
-  //     // no hace nada
-  //     response = null;
-  //   }
-  //   if (response == null) {
-  //     return [];
-  //   }
-
-  //   final notesResponse = NotesResponse.fromJson(response.data);
-
-  //   final List<Note> notes = notesResponse.data.notes
-  //       .map(NoteMapper.noteGoogleSheetsToEntity)
-  //       .toList();
-
-  //   return notes;
-  // }
-
   Future<Response<dynamic>?> doPost(Map<String, dynamic> body) async {
-    //checkConectivity();
     final bodyJson = jsonEncode(body);
+
     Response<dynamic>? response;
     try {
       response = await dio.post(
         baseUrl,
         options: Options(
-          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+          headers: {HttpHeaders.contentTypeHeader: "text/plain"},
+          // headers: {HttpHeaders.contentTypeHeader: "application/json"},//
+          // tuve que cambiar de Json a text/plain por problemas de cors en flutter wep
         ),
         data: bodyJson,
       );
@@ -133,15 +109,7 @@ class NoteGoogleSheetsDatasource extends NotesDatasource {
         response = await redirectDoGet(url!);
       } else {
         rethrow;
-        //throw e.message ?? 'No hay conexión a internet :(';
       }
-      // else if (e.type == DioExceptionType.connectionError) {
-      //   debugPrint('No hay internet aquí');
-      // } else if (e.type == DioExceptionType.connectionTimeout) {
-      //   debugPrint('Se acabó el tiempo de esperar, timeOut');
-      // } else {
-      //   debugPrint('error type: ${e.type.toString()}');
-      // }
     }
     return response;
   }

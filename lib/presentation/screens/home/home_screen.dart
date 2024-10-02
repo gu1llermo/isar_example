@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:animate_do/animate_do.dart';
+import 'package:intl/intl.dart';
 import '/presentation/screens/screens.dart';
 import 'package:isar_example/domain/entities/note.dart';
 import 'package:isar_example/presentation/providers/notes/notes_provider.dart';
@@ -256,8 +257,17 @@ class NoteView extends ConsumerWidget {
   final ScrollController scrollController;
   final bool? isActive;
 
+  String convertTimeStamp(int timestamp) {
+    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+    final formatter = DateFormat('dd-MM-yyyy HH:mm:ss');
+    final formattedTimeStamp = formatter.format(dateTime);
+    return formattedTimeStamp;
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final timeStamp = convertTimeStamp(note.timeStamp!);
+
     return Dismissible(
       key: ValueKey(note.id.toString()),
       onDismissed: (direction) async {
@@ -274,7 +284,7 @@ class NoteView extends ConsumerWidget {
             overflow: TextOverflow.ellipsis,
           ),
           subtitle: Text(
-            note.content,
+            '$timeStamp${note.content}',
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
