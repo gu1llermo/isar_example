@@ -32,7 +32,6 @@ class NoteSembastDatasource extends NotesDatasource {
     final db = await database;
     return await _preferenceStore.record('index').get(db) as int? ??
         int.parse('$_prefixIndex$_indexInicial');
-    // _indexInicial;
   }
 
   // localDatabes siempre empieza en 0 su id, así 10 es el id 0
